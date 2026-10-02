@@ -1,0 +1,41 @@
+# data and outputs
+data/
+cache/
+outputs/
+*.tif
+*.tiff
+*.SAFE/
+*.zip
+*.nc
+*.gpkg
+!tests/fixtures/*.gpkg
+!tests/fixtures/*.tif
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# models
+*.pt
+*.pth
+*.ckpt
+runs/
+
+# web
+web/node_modules/
+web/dist/
+
+# os and editors
+.DS_Store
+.vscode/
+.idea/

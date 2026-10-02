@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dor"
+version = "0.1.0"
+description = "What still connects? Probabilistic cut-off settlement triage for Himalayan debris floods, from Sentinel-1/2 and pre-event OSM, with a grounded English/Nepali situation-report copilot."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+dor = "dor.cli:main"
