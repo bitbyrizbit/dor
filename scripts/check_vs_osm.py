@@ -21,7 +21,7 @@ with rasterio.open(RAW / "diff_geo.tif") as src:
 
 import time
 
-HEADERS = {"User-Agent": "dor-hackathon-prototype (student project, contact: your_real_email)"}
+HEADERS = {"User-Agent": "dor-hackathon-prototype (student project, github.com/bitbyrizbit)"}
 
 
 def fetch_ohsome():
