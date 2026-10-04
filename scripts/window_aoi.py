@@ -16,7 +16,7 @@ SCENES = {
     "post": "S1D_IW_GRDH_1SDV_20260828T122141_20260828T122206_004326_007FA4_C73B_COG",
 }
 PAD_DEG = 0.25
-PAD_PX = 50
+PAD_PX = 300
 OUT = pathlib.Path("data/raw")
 OUT.mkdir(parents=True, exist_ok=True)
 
