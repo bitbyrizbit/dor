@@ -27,7 +27,7 @@ it = next(Client.open(STAC).search(collections=["sentinel-1-grd"], ids=[PRE]).it
 with rasterio.open(it.assets["vv"].href) as src:
     pts, _ = src.gcps
 
-M = 400
+M = 1500
 sel = [g for g in pts if c0 - M <= g.col <= c0 + w + M and r0 - M <= g.row <= r0 + h + M]
 print("gcps used:", len(sel))
 gcps = [GroundControlPoint(row=g.row - r0, col=g.col - c0, x=g.x, y=g.y, z=0.0) for g in sel]
