@@ -36,3 +36,8 @@
 - Valley-floor test, strong-change cells, height above local 2 km minimum: median 279 m at zero shift, 60 m at the OSM-fitted shift (random pixels: 502 m). Share under 50 m: 14.7 percent vs 45.1 percent vs 3.4 percent random
 - Conclusion: a systematic geocoding offset exists and is supported by two independent datasets. Terrain-dependent, so a global shift is only a diagnostic
 - Open: the offset direction (west) does not match a naive terrain-toward-sensor displacement. Hypothesis under test: the GCP reference height is high, so low terrain is displaced away from the sensor
+
+## Geocoding root cause
+- GCPs in the GRD COG are 3D points (z 240 to 6710 m over the scene, 1368 to 4575 m near the AOI). Plain 2D interpolation assumes grid heights of 1.4 to 4.6 km, while valley floors sit at about 0.5 to 1 km, so valley targets were placed roughly 2 km east of their true position
+- Fix under test: inverse geocoding with a model from (lon, lat, DEM height) to (col, row), fitted on the GCPs
+- Fallback if leave-one-out error stays above 20 px: range-Doppler geometry from the product annotation (orbit state vectors)
