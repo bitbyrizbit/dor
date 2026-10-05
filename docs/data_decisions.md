@@ -28,3 +28,5 @@
 - Coherence: SLC scenes exist for the same datatakes, processing untested, cutoff day 6
 - Strong-change thresholds (-3 dB, blobs of 30 px) are placeholders, not tuned
 - Phase correlation coregistration reported low confidence (error 1.0), sharpness of the change line suggests it is fine, to be verified
+
+- DEM: Copernicus DEM GLO-30 via the AWS Open Data mirror (copernicus-dem-30m), tiles N27_00_E085_00 and N28_00_E085_00. Chosen over CDSE because CDSE access may require Copernicus Contributing Missions registration. It is a surface model (includes canopy and buildings). Attribution string is in ATTRIBUTION.md.
