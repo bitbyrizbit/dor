@@ -1,3 +1,4 @@
+import sys
 import json
 import pathlib
 import numpy as np
@@ -11,7 +12,7 @@ F = 5          # downsample factor, about 50 m cells
 CAP_M = 1500.0
 SEARCH = 60    # cells each way, about 3 km
 
-with rasterio.open(RAW / "diff_geo.tif") as src:
+with rasterio.open(RAW / (sys.argv[1] if len(sys.argv) > 1 else "diff_geo.tif")) as src:
     diff = src.read(1)
     tf = src.transform
 H, W = diff.shape

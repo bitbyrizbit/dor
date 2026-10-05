@@ -41,3 +41,10 @@
 - GCPs in the GRD COG are 3D points (z 240 to 6710 m over the scene, 1368 to 4575 m near the AOI). Plain 2D interpolation assumes grid heights of 1.4 to 4.6 km, while valley floors sit at about 0.5 to 1 km, so valley targets were placed roughly 2 km east of their true position
 - Fix under test: inverse geocoding with a model from (lon, lat, DEM height) to (col, row), fitted on the GCPs
 - Fallback if leave-one-out error stays above 20 px: range-Doppler geometry from the product annotation (orbit state vectors)
+
+## Terrain-aware geocoding result (first run)
+- Leave-one-out GCP error (px, 10 m): xy 51.1 mean, xyz 11.3, xyz2 4.2 mean and 14.8 max. Model chosen: xyz2 (7 parameters, 24 GCPs)
+- Zero-shift results with the terrain-aware model: median distance to pre-event OSM rivers 215 m (was 916 m), 48 percent of strong-change cells within 200 m, 43 percent on valley floor. The global 2.2 km shift is no longer needed and is not applied anywhere
+- Remaining spread (p75 1381 m, p90 2459 m) is false positives, not geocoding. To be handled by terrain masks
+- Positional uncertainty to carry into the infrastructure stage: about 40 m mean, 150 m worst case. Use a buffer of about 100 m on road and bridge overlays
+- Strong-change pixel counts are not comparable between geocodings because layover duplicates pixels
