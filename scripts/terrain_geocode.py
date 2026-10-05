@@ -71,6 +71,9 @@ for kind in ("xy", "xyz", "xyz2"):
 kind = min(("xyz", "xyz2"), key=lambda k: loo_mean[k])
 print("model chosen:", kind)
 cc, rc = fit(kind, allidx)
+json.dump({"kind": kind, "x0": float(x0), "y0": float(y0), "z0": float(z0),
+           "cc": cc.tolist(), "rc": rc.tolist(), "c0": int(c0), "r0": int(r0)},
+          open(RAW / "geom_model.json", "w"))
 
 with rasterio.open(RAW / "dem_geo.tif") as d:
     dem = d.read(1)

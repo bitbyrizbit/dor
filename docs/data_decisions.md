@@ -48,3 +48,7 @@
 - Remaining spread (p75 1381 m, p90 2459 m) is false positives, not geocoding. To be handled by terrain masks
 - Positional uncertainty to carry into the infrastructure stage: about 40 m mean, 150 m worst case. Use a buffer of about 100 m on road and bridge overlays
 - Strong-change pixel counts are not comparable between geocodings because layover duplicates pixels
+
+## Shift check after terrain-aware geocoding
+- Best global shift on diff_terrain: about 197 m west, 166 m south. Mean capped distance 612 m vs 604 m at best shift, cost surface flat. Systematic offset removed. No shift is applied anywhere
+- Correction: terrain-aware vs TPS plus fitted shift is a tie on the same coarse metric (mean capped distance 612 vs 546 m, within 200 m of river 44.7 vs 41 percent), not a clear win. The benefit is that it is physical and needs no fit to OSM
