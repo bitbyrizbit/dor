@@ -52,3 +52,18 @@
 ## Shift check after terrain-aware geocoding
 - Best global shift on diff_terrain: about 197 m west, 166 m south. Mean capped distance 612 m vs 604 m at best shift, cost surface flat. Systematic offset removed. No shift is applied anywhere
 - Correction: terrain-aware vs TPS plus fitted shift is a tie on the same coarse metric (mean capped distance 612 vs 546 m, within 200 m of river 44.7 vs 41 percent), not a clear win. The benefit is that it is physical and needs no fit to OSM
+
+## Geometry classes (first run)
+- Model sanity: range bearing 80.3 deg (east, consistent with ascending right-looking), 9.95 m/px along range, incidence estimate 38.6 deg (from GCPs, not from the product annotation)
+- AOI shares: good 75.9, poor 19.3, layover 4.6, shadow 0.2 percent. Thresholds (poor under 15 or 75 to 90 deg local incidence) are placeholders
+- Strong-change cells fall in bad geometry only slightly more often than the base rate (26 vs 24 percent), so geometry does not generate most false positives
+- Strong cells in good geometry are close to rivers far more often (median 132 m, 59 percent within 200 m) than in bad geometry (1384 m, 19.6 percent)
+- Design rule confirmed: bad-geometry cells become "unable to assess", never "no damage"
+- Open: 41 percent of good-geometry strong cells are over 200 m from mapped rivers. River distance is a proxy only, OSM rivers are incomplete
+- Open: detector keeps only decreases below -3 dB and loses increases (rough debris). Switch to absolute change with sign as a feature
+
+## HAND (first run)
+- HAND computed from Copernicus DEM (30 m, subsampled from the AOI grid) with pysheds. pysheds calls np.in1d, which numpy 2.4 removed, so a shim or a numpy pin below 2.4 is required
+- Strong |change| cells in good geometry (27930): median HAND 18 m (dense network, 500 cells) vs 238 m for random pixels. Under 20 m: 52.3 vs 7.8 percent. Result holds with a sparse network (3000 cells): 47.8 vs 4.9 percent
+- Caveat: random pixels are a weak baseline and monsoon river change is not separated from the flood yet. Next: placebo pair on a pre-event interval of the same track
+- HAND is a weight, not a gate: debris flows climb tens of metres in gorges. 34 percent of strong cells have HAND above 50 m
