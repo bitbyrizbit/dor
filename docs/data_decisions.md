@@ -72,3 +72,17 @@
 2026-07-11, 07-23, 08-04, 08-16, 08-28, 09-09, 09-21
 - Event pair: 08-16 to 08-28. Placebo pairs (no event): 07-23 to 08-04 and 08-04 to 08-16. Post pair: 08-28 to 09-09
 - All pairs processed by scripts/run_pair.py with identical settings and thresholds
+
+## Placebo comparison (same track 85, identical settings, absolute change above 3 dB, good geometry only)
+- Strong cells per km2: event 24.2, placebo 07-23/08-04 10.7, placebo 08-04/08-16 15.1, post 08-28/09-09 15.2. Total-count ratio event to placebo is only 1.6 to 2.3. False alarm floor of about 7 to 14 strong cells per km2 in every pair, event included
+- Share within 200 m of a pre-event OSM river: event 55 percent, placebos 16 and 10 percent, post 53 percent. River-aligned density per km2 (arithmetic from the above): event 13.4, placebos 1.7 and 1.5, post 8.0. HAND under 20 m density: event 12.7, placebos about 2.3
+- Conclusion: ordinary monsoon change is not channel-aligned, the flood signal is. The post pair keeps most of the signal with the same sign, so change is progressive, not a one-scene artefact. Cause not identified
+- The south-to-north split does not discriminate (43 to 54 percent in the south for every pair)
+- Rule: thresholds must not be tuned to maximise OSM river alignment (circular) or against EMSR927 (check-only). Tuning uses placebo pairs as known negatives, with a held-out placebo
+
+## Correction after placebo3 (2026-07-11 to 07-23, same track)
+- Placebo3 is the noisiest pair: 42.1 strong cells per km2 (event 24.2), 30 percent negative (event 65.5), within 200 m of rivers 20.7 percent, HAND under 20 m 54.2 percent. Mostly brightening on the wide southern valley floor. Cause not established (seasonal soil or crop change is a guess)
+- The earlier claim "HAND under 20 m separates the event from placebos" is withdrawn: placebo3 has 22.8 HAND-under-20 cells per km2 against 12.7 for the event. HAND stays a weight, not evidence
+- The earlier claim "event has 8 to 9x the river-aligned density of placebos" held only for placebos 1 and 2. Against placebo3 it is 1.5x (13.4 vs 8.7 per km2)
+- What still holds: share of strong cells within 200 m of a river is higher in the event (55 percent) than in any placebo (10 to 21 percent), and the sign mix differs
+- Z-score against local placebo sigma (sigma from placebos 2 and 3, 31 px window, placebo1 held out): at z 3.0 total ratio 5.6, river-aligned ratio 18.3. This is one held-out placebo, the quietest. Not a conclusion. Leave-one-out across all three placebos is the next check
