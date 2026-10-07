@@ -67,3 +67,8 @@
 - Strong |change| cells in good geometry (27930): median HAND 18 m (dense network, 500 cells) vs 238 m for random pixels. Under 20 m: 52.3 vs 7.8 percent. Result holds with a sparse network (3000 cells): 47.8 vs 4.9 percent
 - Caveat: random pixels are a weak baseline and monsoon river change is not separated from the flood yet. Next: placebo pair on a pre-event interval of the same track
 - HAND is a weight, not a gate: debris flows climb tens of metres in gorges. 34 percent of strong cells have HAND above 50 m
+
+## Track 85 ascending scenes in the AOI (all 100 percent coverage, 12 days apart)
+2026-07-11, 07-23, 08-04, 08-16, 08-28, 09-09, 09-21
+- Event pair: 08-16 to 08-28. Placebo pairs (no event): 07-23 to 08-04 and 08-04 to 08-16. Post pair: 08-28 to 09-09
+- All pairs processed by scripts/run_pair.py with identical settings and thresholds
