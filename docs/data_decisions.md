@@ -113,3 +113,14 @@
 - Run health: all 10 pairs ran, coregistration offsets 1.1 px or less, GCP fit residual 2.2 to 2.3 px mean, 9.0 to 9.1 max
 - Limits: the rule design (darkening, 200 m, z 3.0, river alignment) was chosen after seeing the event and the three 2026 placebos, so the event/placebo ratio is optimistic. The nine placebos and the positive control are out of sample. One track, one AOI, S1A vs S1D confound, 2024 pairs not certified flood-free, rule depends on OSM river coverage. No ground truth: false-alarm test, not accuracy
 - Claim allowed: darkening along mapped channels in this AOI is 8x to 60x more frequent in the 2026 event pair than in nine non-flood pairs, and the 2025 flood pair also exceeds them. Not allowed: the detector is validated, or that it measures damage
+
+## OSM roads, places and health facilities (pre-event, first run)
+- Source: overpass-api.de, date directive 2026-07-27T00:00:00Z, queried with out meta. Newest element edit in the response: 2026-07-26T19:19:52Z. The script aborts if any element is newer than the snapshot. Attribution: (c) OpenStreetMap contributors, ODbL
+- Roads: 2957 ways, 2236.1 km (unclassified 1352.6, track 472.6, tertiary 135.8, primary 97.8, residential 87.7, secondary 71.8, service 17.9). 151 connected components, largest holds 2012.3 km (90 percent). 88 bridge ways
+- Places: 217 (hamlet 142, suburb 39, village 20, isolated_dwelling 15, town 1). 76 percent within 500 m of a road node, 94.5 percent within 2 km, 82.5 percent on the largest road component
+- Health facilities: 17 entries. 4 distinct named hospitals (5 entries, Rasuwa District Hospital twice), 8 unnamed (7 hospital, 1 clinic), 3 health posts tagged as hospital, 1 village clinic. 15 of 17 on the largest component
+- Decision: places off the main road component or far from any road are reported as "no mapped road access", never "cut off"
+- Decision: tracks are excluded from the main graph and shown as unreliable alternatives. Class alone does not tell road quality (60 percent of length is unclassified), surface tags not yet used
+- Decision: settlements are town, village, hamlet. Suburbs merge into their parent place
+- Decision: two destination tiers. Tier 1 hospital: named, not a health post, deduplicated within 300 m. Tier 2: any health facility. Unnamed entries count only for tier 2
+- Decision: outputs of the damage stage are named evidence scores, not probabilities, until checked against EMSR927 (check-only)
