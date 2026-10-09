@@ -124,3 +124,12 @@
 - Decision: settlements are town, village, hamlet. Suburbs merge into their parent place
 - Decision: two destination tiers. Tier 1 hospital: named, not a health post, deduplicated within 300 m. Tier 2: any health facility. Unnamed entries count only for tier 2
 - Decision: outputs of the damage stage are named evidence scores, not probabilities, until checked against EMSR927 (check-only)
+
+## Edge evidence (first run, event vs nine out-of-sample placebos)
+- Score per road edge: share of a ~200 m window around the edge midpoint that is strong darkening (z below -3.0 vs sigma from the three 2026 placebos, blobs of 30+ px, good geometry). Flagged = score of at least 0.05 and above all nine placebos (event) or above the other eight (placebo folds). Ranking resolution is 1 in 10, so flagged means unusual, not probable
+- Road inside AOI 2127.0 km: assessable 1960.3 km, unable to assess (poor geometry) 166.7 km (7.8 percent)
+- Event flagged 34.0 km (1.7 percent of assessable). Placebo folds 1.8 to 16.4 km, median 3.8, loudest 2024-08-31/09-12 at 16.4 km. Event is about 9x the median and 2.1x the loudest placebo
+- Event flags 17 of 88 bridge ways (28.1 percent of bridge length, other roads 1.7 percent). Placebo folds for bridges not yet computed, so no bridge conclusion
+- Bridge ways overcount structures (several ways within 100 m). Count structures, clustered within 150 m
+- The score is channel darkening near the crossing, not damage to the bridge: a 10 m pixel cannot see a deck, and a crossing over a darkened river scores high with the structure intact. Label it channel change at crossing
+- Limits: darkening only, ranking against nine pairs, edges with under 50 percent good geometry are unable to assess, no ground truth
