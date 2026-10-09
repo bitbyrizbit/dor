@@ -1,0 +1,14 @@
+{
+  "name": "trishuli_2026",
+  "bbox": [85.10, 27.85, 85.45, 28.25],
+  "event_date": "2026-08-26",
+  "track": {"relative_orbit": 85, "orbit_state": "ascending"},
+  "event_pair": ["2026-08-16", "2026-08-28"],
+  "reference_placebos": [["2026-07-23", "2026-08-04"], ["2026-08-04", "2026-08-16"], ["2026-07-11", "2026-07-23"]],
+  "validation_placebos": [["2025-07-21", "2025-08-02"], ["2025-08-02", "2025-08-14"], ["2025-08-14", "2025-08-26"], ["2025-08-26", "2025-09-07"], ["2024-07-14", "2024-07-26"], ["2024-07-26", "2024-08-07"], ["2024-08-07", "2024-08-19"], ["2024-08-19", "2024-08-31"], ["2024-08-31", "2024-09-12"]],
+  "positive_control": ["2025-06-27", "2025-07-09"],
+  "osm_snapshot": "2026-07-27",
+  "dem": {"source": "Copernicus DEM GLO-30, AWS Open Data mirror", "tiles": ["N27_00_E085_00", "N28_00_E085_00"]},
+  "rule": {"z_threshold": 3.0, "min_blob_px": 30, "river_buffer_m": 200, "sigma_window_px": 31},
+  "scenarios": {"strict": {"min_score": 0.05, "max_placebos_at_or_above": 0}, "loose": {"min_score": 0.02, "max_placebos_at_or_above": 2}}
+}
