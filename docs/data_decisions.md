@@ -86,3 +86,12 @@
 - The earlier claim "event has 8 to 9x the river-aligned density of placebos" held only for placebos 1 and 2. Against placebo3 it is 1.5x (13.4 vs 8.7 per km2)
 - What still holds: share of strong cells within 200 m of a river is higher in the event (55 percent) than in any placebo (10 to 21 percent), and the sign mix differs
 - Z-score against local placebo sigma (sigma from placebos 2 and 3, 31 px window, placebo1 held out): at z 3.0 total ratio 5.6, river-aligned ratio 18.3. This is one held-out placebo, the quietest. Not a conclusion. Leave-one-out across all three placebos is the next check
+
+## Leave-one-out z-score results (sigma from two placebos, third held out, event never in the reference set)
+- Worst fold is placebo3 held out. Total strong-cell ratio event / held-out placebo is 0.6 to 0.8 at every z from 2.5 to 4.0, so the placebo is louder than the event. On the quieter folds: z 3.0 total ratio 5.6 (placebo1 held out) and 2.1 (placebo2 held out)
+- The earlier statement that z-scoring improves the total ratio from about 2.3 to 5.6 held for one fold only. Retracted as a general claim
+- Conclusion: amplitude change relative to local variability, learned from three 2026 placebos, does not separate the flood from monsoon variability in the worst fold. No threshold is chosen
+- Likely reason (hypothesis): placebo3 conditions are noisier than the reference placebos, 73 percent of its strong cells lie in the southernmost band (wide valley floor), mostly brightening. Cause not established
+- Post-hoc observation, not a result: river-aligned darkening only gives event / worst placebo 3.8 to 5.7 across z 2.5 to 4.0 (arithmetic from the printed shares, which are rounded). Found by inspecting the same pairs, so it needs out-of-sample testing. It does not remove ordinary river-water darkening, because river-aligned placebo cells are also mostly dark at high z in placebos 1 and 2
+- HAND does not separate the event, main-channel proximity does. DEM-derived main-channel distance must replace OSM river distance before the pipeline depends on it, since OSM rivers may be sparse elsewhere
+- Frozen rule for out-of-sample testing (set before new runs): sigma from all three 2026 placebos, z below -3.0, 3 px smoothing, blobs of 30+ px, good geometry, within 200 m of an OSM river, metric cells per km2. Pass: event density at least 3x on every new placebo
