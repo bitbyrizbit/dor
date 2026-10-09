@@ -98,7 +98,19 @@ def design(x, y, z):
     u, v, t = (np.asarray(x) - x0) * 10.0, (np.asarray(y) - y0) * 10.0, (np.asarray(z) - z0) / 1000.0
     return np.stack([np.ones_like(u), u, v, t, u * v, u * u, v * v], axis=1)
 
-
+def find_scene(day):
+    res = cat.search(collections=["sentinel-1-grd"], bbox=BBOX,
+                     datetime=f"{day}T00:00:00Z/{day}T23:59:59Z")
+    hits = [it for it in res.items()
+            if it.properties.get("sat:relative_orbit") == 85
+            and it.properties.get("sat:orbit_state") == "ascending"]
+    if not hits:
+        raise SystemExit(f"no track 85 ascending scene on {day}")
+    hits.sort(key=lambda i: i.id)
+    if len(hits) > 1:
+        print("duplicate products on", day, "using", hits[0].id)
+    return hits[0]
+    
 Ag = design(gx, gy, gz)
 cc = np.linalg.lstsq(Ag, gcol, rcond=None)[0]
 rc = np.linalg.lstsq(Ag, grow, rcond=None)[0]

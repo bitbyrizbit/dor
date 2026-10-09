@@ -95,3 +95,21 @@
 - Post-hoc observation, not a result: river-aligned darkening only gives event / worst placebo 3.8 to 5.7 across z 2.5 to 4.0 (arithmetic from the printed shares, which are rounded). Found by inspecting the same pairs, so it needs out-of-sample testing. It does not remove ordinary river-water darkening, because river-aligned placebo cells are also mostly dark at high z in placebos 1 and 2
 - HAND does not separate the event, main-channel proximity does. DEM-derived main-channel distance must replace OSM river distance before the pipeline depends on it, since OSM rivers may be sparse elsewhere
 - Frozen rule for out-of-sample testing (set before new runs): sigma from all three 2026 placebos, z below -3.0, 3 px smoothing, blobs of 30+ px, good geometry, within 200 m of an OSM river, metric cells per km2. Pass: event density at least 3x on every new placebo
+
+## Pre-registered out-of-sample test (frozen before any new pair was run)
+- Rule: sigma from placebos 2026-07-23/08-04, 08-04/08-16, 07-11/07-23 (31 px window, floor at 5th percentile). z below -3.0 after 3 px smoothing, blobs of 30+ px, good geometry only, within 200 m of a pre-event OSM river. Metric: cells per km2 of good geometry
+- New placebos (track 85 ascending, S1A): 2025-07-21/08-02, 08-02/08-14, 08-14/08-26, 08-26/09-07, 2024-07-14/07-26, 07-26/08-07, 08-07/08-19, 08-19/08-31, 08-31/09-12
+- Excluded: 2025-06-27/07-09 (spans the 2025-07-08 Bhotekoshi flood, used as positive control) and 2025-07-09/07-21 (aftermath)
+- Pass: 2026 event density at least 3x every placebo. Positive control: at least 3x the median placebo
+- Exclusions only for a dated documented flood or a failed run, never for score
+- Caveats: sensor change S1A vs S1D, one track and AOI, no ground truth, 2024 pairs not certified flood-free
+- 2024-08-07 and 2024-08-19 exist as two product versions of one datatake. One is used (sorted by id)
+
+## Out-of-sample test results (pre-registered test, run once, no exclusions)
+- Rule as registered above. Event (2026-08-16/08-28): 6.59 river-aligned darkening cells per km2 (9.28 darkening in total)
+- Nine new placebos (S1A, 2024 and 2025): river-aligned darkening 0.11 to 0.82 per km2. Event/placebo ratio 8.0 to 59.9, median 34.7. All nine pass the 3x criterion. Lowest ratio: 2024-08-31/09-12
+- Positive control (2025-06-27/07-09, spans the 2025-07-08 Bhotekoshi flood): 3.96 per km2, 20.8x the median placebo (0.19). Pass
+- Total darkening without the river filter does not separate: 2024-08-19/08-31 has 12.81 per km2 against 9.28 for the event, 2024-08-31/09-12 has 8.51. The separation comes from channel alignment (OSM rivers within 200 m), not from amplitude. Cause of the strong off-river darkening in 2024-08-19/08-31 is unknown
+- Run health: all 10 pairs ran, coregistration offsets 1.1 px or less, GCP fit residual 2.2 to 2.3 px mean, 9.0 to 9.1 max
+- Limits: the rule design (darkening, 200 m, z 3.0, river alignment) was chosen after seeing the event and the three 2026 placebos, so the event/placebo ratio is optimistic. The nine placebos and the positive control are out of sample. One track, one AOI, S1A vs S1D confound, 2024 pairs not certified flood-free, rule depends on OSM river coverage. No ground truth: false-alarm test, not accuracy
+- Claim allowed: darkening along mapped channels in this AOI is 8x to 60x more frequent in the 2026 event pair than in nine non-flood pairs, and the 2025 flood pair also exceeds them. Not allowed: the detector is validated, or that it measures damage
