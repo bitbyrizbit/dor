@@ -2,11 +2,12 @@ import json
 import pathlib
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from dotenv import load_dotenv
-from dor.copilot.ask import ask
+from dor.copilot.ask import answer
 
 load_dotenv()
 RES = json.loads(pathlib.Path("data/raw/access_results.json").read_text(encoding="utf-8"))
 OUT = pathlib.Path("outputs")
+CANNED = json.loads((OUT / "qa.json").read_text(encoding="utf-8"))
 
 
 class H(BaseHTTPRequestHandler):
@@ -29,8 +30,9 @@ class H(BaseHTTPRequestHandler):
             return
         n = int(self.headers.get("Content-Length", 0))
         body = json.loads(self.rfile.read(n) or b"{}")
-        out = ask(RES, str(body.get("q", ""))[:300], "ne" if body.get("lang") == "ne" else "en")
+        out = answer(RES, str(body.get("q", ""))[:300], "ne" if body.get("lang") == "ne" else "en", CANNED)
         self._send(200, json.dumps(out, ensure_ascii=False).encode("utf-8"), "application/json; charset=utf-8")
+
 
     def log_message(self, *a):
         pass

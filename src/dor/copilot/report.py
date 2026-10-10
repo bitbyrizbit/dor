@@ -6,20 +6,23 @@ SAFE = ["Sentinel-1", "Sentinel-2", "OpenStreetMap", "DOR"]
 EN = {
     "title": "DOR situation report for event date {event_date}",
     "method": "Generated automatically from Sentinel-1 radar change and pre-event OpenStreetMap roads (snapshot {osm_date}). Educational prototype, not an operational tool.",
-    "summary": "Settlements considered: {n_settle}. With a mapped road route to a named hospital before the event: {n_base}. Cut off from every named hospital under the strict criterion: {n_strict}.",
-    "sens": "That count depends on the closure rule. From the loosest to the strictest of five settings it is {sw0}, {sw1}, {sw2}, {sw3} and {sw4}.",
+    "summary": "Settlements considered: {n_settle}. With a mapped road route to a destination hospital before the event: {n_base}. Cut off from every destination hospital under the strict criterion: {n_strict}.",
+    "sens": "That count depends on the closure rule. Across the {n_sw} settings it is {sw0}, {sw1}, {sw2}, {sw3} and {sw4}.",
     "uncertain": "Settlements whose route depends on road that could not be assessed or lies outside the assessed area: {n_unc}. Settlements with a longer route under the loose criterion: {n_rer}, on average {mean_extra} km longer.",
-    "noroad": "Not reported as cut off: no mapped road access before the event: {n_noroad}. Reachable only by a track: {n_track}. Mapped road that never reached a named hospital: {n_disc}.",
-    "suspect": "Routes more than three times the straight-line distance to the nearest named hospital, which can mean a gap in the map: {n_suspect}.",
+
+    "noroad": "Not reported as cut off: no mapped road access before the event: {n_noroad}. Reachable only by a track: {n_track}. Mapped road that never reached a destination hospital: {n_disc}.",
+    "suspect": "Routes more than three times the straight-line distance to the nearest destination hospital, which can mean a gap in the map: {n_suspect}.",
     "flags": "Road flagged: {km_strict} km (strict) and {km_loose} km (loose) of {km_assess} km of assessable road, tracks excluded. Bridge structures flagged (strict): {br_strict} of {br_total}.",
     "unassessed": "Unable to assess: {km_unass} km of road inside the radar footprint lies in layover, shadow or poor geometry. This is not the same as undamaged. Roads outside the footprint are also treated as unassessed.",
     "group_head": "Flagged places that decide the most settlements (verify these first):",
     "group_item": "- {vkind} near {lat}, {lon}: {k} settlements are cut off behind it under the strict criterion, for example {names}. Strongest evidence score there: {score}.",
     "group_item_noname": "- {vkind} near {lat}, {lon}: {k} settlements are cut off behind it under the strict criterion (none named on the map). Strongest evidence score there: {score}.",
     "multi": "Settlements cut off under the strict criterion that no single flagged place would reconnect: {n_multi}.",
-    "limits": "Flagged means radar signal near the road dropped more than in all (strict) or nearly all (loose) of nine non-flood radar pairs. It is evidence of change, not confirmed damage, and a flagged place is assumed impassable. Hospitals beyond the mapped area are not considered.",
+    "bld": "Mapped buildings inside the strict radar evidence zone: {b_strict} of {b_assess} that could be assessed ({b_total} mapped in total). This is nearby radar change, not confirmed damage.",
+    "limits": "Flagged means radar signal near the road dropped more than in all (strict) or nearly all (loose) of {n_pl} non-flood radar pairs. It is evidence of change, not confirmed damage, and a flagged place is assumed impassable. Hospitals beyond the mapped area are not considered.",
     "vkind_bridge": "bridge", "vkind_road": "road segment",
 }
+
 NE = json.loads(pathlib.Path(__file__).with_name("ne.json").read_text(encoding="utf-8"))
 
 
@@ -48,7 +51,10 @@ def build(res, lang="en"):
         "km_unass": n("km_unass", t["km_unassessed"], "km", src, 1),
         "br_strict": n("br_strict", t["bridge_structures_strict"], "structures", src),
         "br_total": n("br_total", t["bridge_structures_total"], "structures", src),
+        "n_pl": n("n_pl", res.get("n_placebos", 9), "pairs", src),
+        "n_sw": n("n_sw", len(res.get("sweep", [])), "settings", src),
     }
+
     for i, s in enumerate(res["sweep"]):
         V[f"sw{i}"] = n(f"sw{i}", s["isolated"], "settlements", src)
     protected = list(SAFE)
@@ -74,5 +80,13 @@ def build(res, lang="en"):
                 lines.append(T["group_item_noname"].format(**vals))
         lines.append("")
     lines.append(T["multi"].format(**V))
-    lines.append(T["limits"])
+    bs = res.get("buildings")
+    if bs:
+        V.update({"b_strict": n("b_strict", bs["strict"], "buildings", src),
+                  "b_assess": n("b_assess", bs["assessable"], "buildings", src),
+                  "b_total": n("b_total", bs["total"], "buildings", src)})
+        lines.append(T["bld"].format(**V))
+    lines.append(T["limits"].format(**V))
     return "\n".join(lines), L, protected
+
+

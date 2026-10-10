@@ -52,7 +52,8 @@ vk = lambda g: "bridge" if g["bridge"] else "road segment"
 
 hero = (f"{n('n_strict', c['ISOLATED_STRICT'], 'settlements', S)} of {n('n_base', t['reachable_at_baseline'], 'settlements', S)} "
         f"settlements with a mapped hospital route may be cut off under the strict rule. "
-        f"Across five closure rules the answer ranges from {n('sw_min', min(sw), 'settlements', S)} to {n('sw_max', max(sw), 'settlements', S)}.")
+        f"Across {n('n_sw', len(sw), 'rules', S)} closure rules the answer ranges from {n('sw_min', min(sw), 'settlements', S)} to {n('sw_max', max(sw), 'settlements', S)}.")
+
 qa = []
 if G:
     g0 = G[0]
@@ -71,12 +72,18 @@ if G:
 a3 = (f"The count of {n('n_strict', c['ISOLATED_STRICT'], 'settlements', S)} depends on the rule: {n('sw0', sw[0], 'settlements', S)} at the loosest setting "
       f"and {n('sw4', sw[-1], 'settlements', S)} at the strictest. "
       f"Flagged road is {n('km_strict', t['km_flag_strict'], 'km', S, 1)} km of {n('km_assess', t['km_assessable'], 'km', S, 1)} km assessable. "
-      "Flagged means the radar signal near the road dropped more than in all of nine non-flood radar pairs. It is evidence of change, not confirmed damage.")
+      f"Flagged means the radar signal near the road dropped more than in all of {n('n_pl', 9, 'pairs', S)} non-flood radar pairs. It is evidence of change, not confirmed damage.")
+
 a4 = (f"{n('km_unass', t['km_unassessed'], 'km', S, 1)} km of road inside the radar footprint lies in layover, shadow or poor geometry and is not assessed. "
       f"{n('n_noroad', c['NO_ROAD'], 'settlements', S)} settlements have no mapped road and {n('n_track', c['TRACK_ONLY'], 'settlements', S)} have only a track, "
       "so they are not reported as cut off. Roads outside the radar footprint are not assessed, optical imagery is not used, and nothing here is confirmed damage.")
 qa.append({"q": "How sure are we?", "a": a3})
 qa.append({"q": "What can DOR not see?", "a": a4})
+canned = {"how_sure": a3, "cannot_see": a4}
+if G:
+    canned.update({"cut_off": a1, "check_first": a2})
+(OUT / "qa.json").write_text(json.dumps(canned, ensure_ascii=False, indent=1), encoding="utf-8")
+
 for text in [hero] + [x["a"] for x in qa]:
     ok, problems = check(text, L, prot)
     if not ok:
@@ -92,7 +99,14 @@ data = {"bbox": BBOX, "run_id": res["run_id"], "counts": c, "sweep": res["sweep"
         "sitrep": {"en": (OUT / "sitrep_en.md").read_text(encoding="utf-8"),
                    "ne": (OUT / "sitrep_ne.md").read_text(encoding="utf-8")}}
 
+import base64
+fpp = OUT / "footprint.png"
+if fpp.exists():
+    data["footprint"] = "data:image/png;base64," + base64.b64encode(fpp.read_bytes()).decode()
+    data["footprint_bounds"] = json.loads((RAW / "footprint.json").read_text())["bounds"]
+
 TEMPLATE = r"""<!doctype html><html><head><meta charset="utf-8"><title>DOR - What still connects?</title>
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <style>
@@ -135,6 +149,8 @@ const clean = t => h(t).replace(/\[(L\d{3})\]/g, '<sup class="ref">$1</sup>');
 const flip = a => a.map(p => [p[1], p[0]]);
 const map = L.map("map", {preferCanvas:true});
 map.fitBounds([[D.bbox[1], D.bbox[0]], [D.bbox[3], D.bbox[2]]]);
+let fpl = null;
+if (D.footprint) { const b = D.footprint_bounds; fpl = L.imageOverlay(D.footprint, [[b.south, b.west], [b.north, b.east]], {opacity:0.85}).addTo(map); }
 const ctx = L.polyline(D.ctx.map(flip), {color:"#b9b4a6", weight:1}).addTo(map);
 const loose = L.polyline(D.loose.map(flip), {color:"#e67e22", weight:3}).addTo(map);
 const strict = L.polyline(D.strict.map(flip), {color:"#c0392b", weight:4}).addTo(map);
@@ -154,7 +170,10 @@ D.groups.forEach((g, i) => {
   m.bindPopup("<b>" + (g.bridge ? "Bridge" : "Road segment") + "</b><br>" + g.reconnect + " settlements are cut off behind it (strict rule).<br>Evidence score " + g.max_score + ". Verify first.");
   m.addTo(grp); g._m = m;
 });
-L.control.layers(null, {"Pre-event main roads":ctx, "Flagged road (loose)":loose, "Flagged road (strict)":strict, "Settlements":setl, "Destination hospitals":hosp, "Check first":grp}, {collapsed:false}).addTo(map);
+const ov = {"Pre-event main roads":ctx, "Flagged road (loose)":loose, "Flagged road (strict)":strict, "Settlements":setl, "Destination hospitals":hosp, "Check first":grp};
+if (fpl) ov["Radar change evidence zone"] = fpl;
+L.control.layers(null, ov, {collapsed:false}).addTo(map);
+
 
 document.getElementById("run").textContent = D.run_id;
 document.getElementById("hero").innerHTML = clean(D.hero);
@@ -177,11 +196,14 @@ document.getElementById("go").onclick = async () => {
     const r = await fetch("/ask", {method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({q: q, lang: document.getElementById("b_ne").className === "on" ? "ne" : "en"})});
     const j = await r.json();
-    ans.innerHTML = clean(j.answer || "No answer.") + '<div class="foot">' +
-      (j.mode === "llm" ? "model answer, every number checked against the ledger" :
-       j.mode === "refusal" ? "refusal: no evidence for this in the run" : "template fallback: model unavailable or failed the check") + '</div>';
+    const src = j.cited ? Object.entries(j.cited).map(([k, v]) => "<br>" + k + " = " + h(v)).join("") : "";
+    ans.innerHTML = clean(j.answer || "No answer.") +
+      '<div class="foot">' + (j.mode === "llm" ? "Model answer. Numbers are checked against the ledger. The wording is not verified, check the sources below." :
+       j.mode === "refusal" ? "No evidence for this in the run." : "Standard answer (the model was unavailable, found no matching fact, or failed the check).") +
+      src + '</div>';
   } catch (e) { ans.textContent = "Free-text questions need the local server: python scripts/serve.py"; }
 };
+
 </script></body></html>"""
 
 (OUT / "dashboard.html").write_text(

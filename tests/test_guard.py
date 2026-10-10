@@ -35,3 +35,13 @@ def test_unknown_id_fails():
 def test_protected_names_ignored():
     L, a, b = mk()
     assert check(f"Ward 5 has {a} places.", L, protected=["Ward 5"])[0]
+
+
+def test_number_word_needs_a_cited_source():
+    L, a, b = mk()
+    assert not check(f"Two unnamed hamlets are listed {a}.", L)[0]
+    L2 = Ledger("t")
+    ref = L2.fixed("x", "Nine non-flood pairs", "t")
+    tag = ref[ref.rindex("["):]
+    assert check(f"Compared with nine pairs {tag}.", L2)[0]
+

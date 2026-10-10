@@ -5,7 +5,11 @@ from dor.copilot.guard import check
 from dor.manifest import write_manifest
 
 res = json.loads(pathlib.Path("data/raw/access_results.json").read_text(encoding="utf-8"))
+bp = pathlib.Path("data/raw/buildings_summary.json")
+if bp.exists():
+    res["buildings"] = json.loads(bp.read_text(encoding="utf-8"))
 out = pathlib.Path("outputs")
+
 out.mkdir(exist_ok=True)
 pairs = {}
 for lang in ("en", "ne"):
