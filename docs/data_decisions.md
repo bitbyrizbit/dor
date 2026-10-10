@@ -173,3 +173,16 @@
 - Nepali answers are model-generated and not reviewed by a native speaker
 - Free-tier rate limits apply, fallback exists. Red team: 13 prompts, smoke test only
 
+## EMSR927 comparison design (frozen before any comparison was run)
+- Reference: EMSR927 vector grading products, check-only, in eval/data/ems. Never read by src/dor, never used to set a threshold or a rule. Credit: European Union, Copernicus Emergency Management Service data
+- Selection per area and layer: the earliest assessment product (PRODUCT before MONITnn), highest version of that product. Selected file names and versions are printed and recorded here after the run
+- DOR settings are frozen: strict (score at least 0.05 and above all 9 placebos), loose (score at least 0.02, at most 2 of 9 placebos at or above). Nothing is changed after seeing results
+- Usable areas by their own bounds: AOI01 Syapru Besi and AOI03 Bidur. AOI02 lies north of our box, AOI05 only touches the south-west corner. Results are reported per area and pooled
+- Roads: our non-track assessable OSM edges are labelled by the nearest EMS non-track road line within 25 m. Positive = Destroyed or Damaged. Negative = No visible damage. Possibly damaged is reported separately. Unlabelled edges are excluded, not counted as negative
+- Metrics, length weighted in km: recall, false positive rate, precision, lift over the base rate, AUC of the continuous score, with cluster bootstrap 95 percent intervals over EMS road lines (1000 resamples, seed 0). Edge-level labels are not independent, so intervals are wide on purpose
+- Baselines on the same labelled edges: lowest HAND at the same flagged km, and random flagging at the same km
+- Bridges: EMS Destroyed or Damaged bridge points matched to OSM bridge edges within 150 m. Reported: matchable, assessable, flagged strict, flagged loose. EMS lists damaged bridges only, so absence is not evidence of intact
+- Buildings: recall of EMS Destroyed, Damaged and Possibly damaged building points at our score at their location, against the flagged share of area inside the same AOI. Precision is not computable
+- Spot check: the verify-first places from the access analysis, with the nearest EMS grade within 100 m and the AOI they fall in
+- All results are reported whatever they show. Where EMS has no feature the answer is unknown, never intact
+
