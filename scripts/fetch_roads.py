@@ -14,7 +14,8 @@ SNAP = "2026-07-27T00:00:00Z"
 RAW = pathlib.Path("data/raw")
 HEADERS = {"User-Agent": "dor-hackathon-prototype (student project, github.com/bitbyrizbit)"}
 URLS = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"]
-S, W, N, E = BBOX[1], BBOX[0], BBOX[3], BBOX[2]
+BUF = 0.15
+S, W, N, E = BBOX[1] - BUF, BBOX[0] - BUF, BBOX[3] + BUF, BBOX[2] + BUF
 KX, KY = 111320.0 * np.cos(np.radians(28.0)), 110574.0
 HW = "motorway|trunk|primary|secondary|tertiary|unclassified|residential|track|service|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link"
 
@@ -23,7 +24,7 @@ def run(q):
     for url in URLS:
         for attempt in (1, 2):
             try:
-                r = requests.post(url, data={"data": q}, headers=HEADERS, timeout=240)
+                r = requests.post(url, data={"data": q}, headers=HEADERS, timeout=360)
                 print(url, r.status_code)
                 if r.status_code == 200:
                     return url, r.json().get("elements", [])
@@ -33,20 +34,45 @@ def run(q):
     raise SystemExit("all overpass attempts failed")
 
 
-q_roads = f'[out:json][timeout:200][date:"{SNAP}"];way["highway"~"^({HW})$"]({S},{W},{N},{E});out meta geom qt;'
-q_pts = (f'[out:json][timeout:200][date:"{SNAP}"];('
+q_roads = f'[out:json][timeout:300][date:"{SNAP}"];way["highway"~"^({HW})$"]({S},{W},{N},{E});out meta geom qt;'
+q_pts = (f'[out:json][timeout:300][date:"{SNAP}"];('
          f'node["place"~"^(city|town|village|hamlet|suburb|isolated_dwelling)$"]({S},{W},{N},{E});'
          f'nwr["amenity"~"^(hospital|clinic)$"]({S},{W},{N},{E}););out meta center qt;')
 
-src1, ways = run(q_roads)
-src2, pts = run(q_pts)
+import hashlib
+
+def cache_key(q, bbox, snap):
+    h = hashlib.sha256(f"{bbox}_{snap}_{q}".encode("utf-8")).hexdigest()[:12]
+    return f"osm_{h}.json"
+
+ck_roads = RAW / cache_key(q_roads, (S, W, N, E), SNAP)
+ck_pts = RAW / cache_key(q_pts, (S, W, N, E), SNAP)
+
+if ck_roads.exists() and ck_pts.exists():
+    ways = json.loads(ck_roads.read_text(encoding="utf-8"))
+    pts = json.loads(ck_pts.read_text(encoding="utf-8"))
+    src1, src2 = "cached", "cached"
+elif (RAW / "osm_roads_raw.json").exists() and (RAW / "osm_points_raw.json").exists():
+    ways = json.loads((RAW / "osm_roads_raw.json").read_text(encoding="utf-8"))
+    pts = json.loads((RAW / "osm_points_raw.json").read_text(encoding="utf-8"))
+    src1, src2 = "cached", "cached"
+    # save to key-based cache as well
+    ck_roads.write_text(json.dumps(ways), encoding="utf-8")
+    ck_pts.write_text(json.dumps(pts), encoding="utf-8")
+else:
+    src1, ways = run(q_roads)
+    src2, pts = run(q_pts)
+    ck_roads.write_text(json.dumps(ways), encoding="utf-8")
+    ck_pts.write_text(json.dumps(pts), encoding="utf-8")
+    (RAW / "osm_roads_raw.json").write_text(json.dumps(ways), encoding="utf-8")
+    (RAW / "osm_points_raw.json").write_text(json.dumps(pts), encoding="utf-8")
+
 print("sources:", src1, src2)
 ts = max(e.get("timestamp", "") for e in ways + pts)
 print("elements: ways", len(ways), "points", len(pts), "| newest edit timestamp:", ts)
 if ts > SNAP:
     raise SystemExit("DATA RULE: element newer than the snapshot, discarding. Do not use.")
-(RAW / "osm_roads_raw.json").write_text(json.dumps(ways))
-(RAW / "osm_points_raw.json").write_text(json.dumps(pts))
+
 
 G = nx.Graph()
 xy = {}
@@ -110,8 +136,8 @@ for a, b, d in G.edges(data=True):
             color="red" if d["bridge"] else "0.5", lw=1.4 if d["bridge"] else 0.5)
 ax.scatter([r["lon"] for r in pl], [r["lat"] for r in pl], s=6, c="tab:blue", label="places")
 ax.scatter([r["lon"] for r in hosp], [r["lat"] for r in hosp], s=60, c="tab:green", marker="+", label="hospital or clinic")
-ax.set_xlim(BBOX[0], BBOX[2])
-ax.set_ylim(BBOX[1], BBOX[3])
+ax.set_xlim(W, E)
+ax.set_ylim(S, N)
 ax.legend()
 ax.set_title("pre-event OSM roads (grey), bridges (red), places, health")
 plt.savefig(RAW / "osm_roads.png", dpi=110, bbox_inches="tight")

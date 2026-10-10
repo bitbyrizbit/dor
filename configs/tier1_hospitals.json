@@ -1,0 +1,4 @@
+{
+  "note": "Destination hospitals picked by hand from the pre-event OSM hospital list. Case-insensitive substring match on the OSM name.",
+  "name_contains": ["sanjivani hospital", "kalika community hospital", "rasuwa district hospital", "trishuli hospital", "melamchi hospital"]
+}

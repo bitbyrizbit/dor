@@ -133,3 +133,43 @@
 - Bridge ways overcount structures (several ways within 100 m). Count structures, clustered within 150 m
 - The score is channel darkening near the crossing, not damage to the bridge: a 10 m pixel cannot see a deck, and a crossing over a darkened river scores high with the structure intact. Label it channel change at crossing
 - Limits: darkening only, ranking against nine pairs, edges with under 50 percent good geometry are unable to assess, no ground truth
+
+## Bridge fold check (edge evidence, event vs placebo folds)
+- Assessable bridge structures (clustered within 150 m): 74. Event flags 13 structures (17 ways). Placebo folds flag 1, 0, 2, 0, 0, 0, 1, 1, 0 structures (median 0, max 2)
+- Conclusion: channel darkening at bridge crossings separates the event from the placebo folds. It is channel change at the crossing, not damage to the bridge. Bridges follow the same rule as other edges
+- Limits: ranking resolution 1 in 10, event ranked against 9 pairs and each fold against 8, 10 m pixels cannot see a deck
+
+## Access scenarios (fixed before the first run)
+- Graph: pre-event OSM roads, tracks excluded. Settlements are town, village, hamlet. Snap limit 500 m to a road node. Destination tier 1: named hospital, not a health post, deduplicated within 300 m. Any health facility is tier 2
+
+## Access analysis, first run (superseded by v2, not to be quoted)
+- 163 settlements: ISOLATED_STRICT 32, UNCERTAIN_UNASSESSED 32, REROUTED 3, NO_CHANGE 31, DISCONNECTED_BASELINE 16, NO_ROAD 49. Reachable at baseline 98
+- Sensitivity (isolated of 98, loosest to strictest): 32, 32, 32, 29, 1. About 28 settlements depend on edges with score 0.10 to 0.20
+- Known defects: graph ends at the SAR bbox (hospitals outside the box ignored), tracks excluded so track-only villages counted as NO_ROAD, list sorted by baseline distance but labelled most likely cut off, flagged km included tracks while the graph excluded them
+- v2 changes: OSM roads and hospitals fetched with a 0.15 degree buffer, roads outside the SAR footprint treated as unassessed, TRACK_ONLY state, circuity check (route length over straight-line distance to nearest named hospital, 3.0 is a placeholder), results grouped by the flagged place that decides them, km counted without tracks
+- Strict scenario: edges closed if assessable, score >= 0.05 and above all 9 placebos
+- Loose scenario: edges closed if assessable, score >= 0.02 and at most 2 of 9 placebos at or above
+- Unassessed scenario: loose closures plus every edge inside the AOI that is not assessable (layover, shadow, poor geometry)
+- States: NO_ROAD, DISCONNECTED_BASELINE, ISOLATED_STRICT, ISOLATED_LOOSE (isolated under loose only), UNCERTAIN_UNASSESSED (reachable under loose, not under unassessed), REROUTED (loose route over 50 m longer), NO_CHANGE
+- Closure is an assumption: a flagged edge is assumed impassable. Flagged means evidence of change near the road, not confirmed damage
+- Sensitivity sweep over (0.02, 2), (0.03, 1), (0.05, 0), (0.10, 0), (0.20, 0) is reported with every result
+- Output is evidence under named scenarios, not a calibrated probability, until checked against EMSR927
+
+## Access analysis v2 (first buffered run) and corrections
+- OSM fetch buffered by 0.15 degrees: 23401 ways, 8849.0 km, 442 components (largest 95 percent of length), 443 bridge ways, 685 places, 1049 points. Newest edit 2026-07-26T19:19:52Z, guard passed
+- The automatic hospital filter returned 81 entries including health posts spelled in other ways, a beauty parlour, a hypnosis centre, dental and ENT clinics, and Kathmandu valley hospitals pulled in by the buffer. Replaced by a hand-picked destination list in configs/tier1_hospitals.json (Sanjivani, Kalika Community, Rasuwa District, Trishuli, Melamchi). This is a human choice, not a result
+- Strict-isolated count 30, sensitivity 30, 30, 30, 29, 1 across five rules. One road segment near 28.1615N 85.3359E decides 10 settlements, 17 of 30 stay cut off even if any single flagged place is open
+- The circuity threshold of 3.0 was a placeholder and flags half of all settlements (median 3.1). Removed from the report. Circuity stays in the CSV and popups
+- The map in the first v2 paste (32/35/3/28/10/16/39) did not match the console and report (30/38/1/30/10/15/39), so the two came from different runs. Map titles now carry the run id
+- Chamoli test (bbox from memory, 2021-02-07): 11 scenes on one track, no pair spans the date. Cause unknown. Live use on another area is not supported
+- Scope: the AOI covers the upper and middle reach only. The reported runout is close to 100 km, so the lower reach is outside it
+- EMSR927 (check-only): four areas of interest. Data downloaded by hand into eval/data/ems, not committed, never used for thresholds. Product names, versions and release dates to be recorded here exactly as the download page shows them
+
+## Copilot with a language model (Groq)
+- The model gets a numbered facts sheet built from the ledger, writes sentences that cite fact ids, never computes. Checker: every number must appear in a cited fact, every sentence must cite, unknown ids rejected. One retry with the checker's complaint, then template fallback. NOT_IN_FACTS refusal when the facts do not cover the question
+- The guard stops invented numbers. It does not stop wrong wording, wrong place names or invented causes without digits. Manual review of the red-team answers covers that
+- Key in .env, read only by a local server bound to 127.0.0.1, never embedded in the dashboard
+- Facts (OSM place names and aggregate counts) are sent to a third-party API. No personal data
+- Nepali answers are model-generated and not reviewed by a native speaker
+- Free-tier rate limits apply, fallback exists. Red team: 13 prompts, smoke test only
+
